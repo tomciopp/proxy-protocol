@@ -3,16 +3,29 @@ defmodule ProxyProtocol do
   Documentation for ProxyProtocol.
   """
 
-  @doc """
-  Hello world.
+  defstruct [:dest_address, :dest_port, :inet, :src_address, :src_port, :version]
 
-  ## Examples
+  def parse(<<"\n\r\n\r\0\n\rQUIT\n", _ :: binary>> = packet) do
+    ProxyProtocol.V2.Parser.parse(packet)
+  end
 
-      iex> ProxyProtocol.hello
-      :world
+  defp parse(<<"PROXY TCP4 ", _ :: binary>> = packet) do
+    ProxyProtocol.V1.Parser.parse(packet)
+  end
 
-  """
-  def hello do
-    :world
+  defp parse(<<"PROXY TCP6 ", _ :: binary>> = packet) do
+    ProxyProtocol.V1.Parser.parse(packet)
+  end
+
+  defp parse(<<"PROXY UNKNOWN ", _ :: binary>> = packet) do
+    ProxyProtocol.V1.Parser.parse(packet)
+  end
+
+  defp parse(<<"PROXY UNKNOWN\r\n">> = packet) do
+    ProxyProtocol.V1.Parser.parse(packet)
+  end
+
+  defp parse(packet) do
+    {:ok, %{ buffer: packet, proxy: %ProxyProtocol{} }}
   end
 end
