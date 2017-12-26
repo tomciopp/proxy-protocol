@@ -1,6 +1,6 @@
 defmodule ProxyProtocol do
   @moduledoc """
-  Documentation for ProxyProtocol.
+  Handles parsing either v1 or v2 of the proxy protocol
   """
 
   defstruct [:dest_address, :dest_port, :inet, :src_address, :src_port, :version]
@@ -9,23 +9,23 @@ defmodule ProxyProtocol do
     ProxyProtocol.V2.Parser.parse(packet)
   end
 
-  defp parse(<<"PROXY TCP4 ", _ :: binary>> = packet) do
+  def parse(<<"PROXY TCP4 ", _ :: binary>> = packet) do
     ProxyProtocol.V1.Parser.parse(packet)
   end
 
-  defp parse(<<"PROXY TCP6 ", _ :: binary>> = packet) do
+  def parse(<<"PROXY TCP6 ", _ :: binary>> = packet) do
     ProxyProtocol.V1.Parser.parse(packet)
   end
 
-  defp parse(<<"PROXY UNKNOWN ", _ :: binary>> = packet) do
+  def parse(<<"PROXY UNKNOWN ", _ :: binary>> = packet) do
     ProxyProtocol.V1.Parser.parse(packet)
   end
 
-  defp parse(<<"PROXY UNKNOWN\r\n">> = packet) do
+  def parse(<<"PROXY UNKNOWN\r\n">> = packet) do
     ProxyProtocol.V1.Parser.parse(packet)
   end
 
-  defp parse(packet) do
+  def parse(packet) do
     {:ok, %{ buffer: packet, proxy: %ProxyProtocol{} }}
   end
 end
